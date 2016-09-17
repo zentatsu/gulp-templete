@@ -1,2 +1,2 @@
-# gulp-templete
+# gulp-template
 sassを使いたいだけのテンプレート
