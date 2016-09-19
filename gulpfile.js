@@ -6,30 +6,56 @@ var watch = require('gulp-watch');
 var plumber = require('gulp-plumber');
 var browserSync = require('browser-sync').create();
 
+
+/*
+ * config
+ */
+var CONFIG = {
+  watchFiles: {
+    html : 'src/**/*.html',
+    css  : 'src/**/*.css' ,
+    sass : 'src/**/*.scss',
+    js   : 'src/**/*.js',
+    jpg  : 'src/**/*.jpg',
+    png  : 'src/**/*.png',
+    gif  : 'src/**/*.gif'
+  },
+  directory: {
+    dev : 'src',
+    release : 'dist'
+  }
+};
+
 /*
  * copy html, js, css files
  */
 gulp.task('copy', function(){
-  return gulp.src(['./src/**/*.html', './src/**/*.js', './src/**/*.css'], { base: 'src'})
-      .pipe(gulp.dest('./dist'));
+  return gulp.src([
+    CONFIG.watchFiles.html,
+    CONFIG.watchFiles.js,
+    CONFIG.watchFiles.css], { base: CONFIG.directory.dev})
+      .pipe(gulp.dest(CONFIG.directory.release));
 });
 
 /*
  * copy image files
  */
 gulp.task('copy_images', function(){
-  return gulp.src(['./src/**/*.jpg', './src/**/*.png', './src/**/*.gif'], { base: 'src'})
-      .pipe(gulp.dest('./dist'))
+  return gulp.src([
+    CONFIG.watchFiles.jpg,
+    CONFIG.watchFiles.png,
+    CONFIG.watchFiles.gif], { base: CONFIG.directory.dev})
+      .pipe(gulp.dest(CONFIG.directory.release))
 });
 
 /*
  * compile sass
  */
 gulp.task('sass', function(){
-  return gulp.src('src/**/*.scss', { base: 'src'})
+  return gulp.src(CONFIG.watchFiles.sass, { base: CONFIG.directory.dev})
     .pipe(plumber())
-    .pipe(sass({outputStyle : 'expanded'}))
-    .pipe(gulp.dest('./dist'));
+    .pipe(sass({outputStyle : 'expanded'})) //nested, compact, expanded, compressed
+    .pipe(gulp.dest(CONFIG.directory.release));
 });
 
 /*
@@ -37,19 +63,19 @@ gulp.task('sass', function(){
  */
 gulp.task('watch', function(){
   watch([
-    'src/**/*.scss'], function(event){
+    CONFIG.watchFiles.sass], function(event){
       gulp.start('sass');
     });
   watch([
-    'src/**/*.js',
-    'src/**/*.html',
-    'src/**/*.css'], function(event){
+    CONFIG.watchFiles.html,
+    CONFIG.watchFiles.js,
+    CONFIG.watchFiles.css], function(event){
       gulp.start('copy');
     });
   watch([
-    'src/**/*.jpg',
-    'src/**/*.png',
-    'src/**/*.gif'], function(event){
+    CONFIG.watchFiles.jpg,
+    CONFIG.watchFiles.png,
+    CONFIG.watchFiles.gif], function(event){
       gulp.start('copy_images');
     });
 });
@@ -60,12 +86,12 @@ gulp.task('watch', function(){
 gulp.task('browser-sync', function(){
   browserSync.init({
     server: {
-      baseDir: './dist'
+      baseDir: CONFIG.directory.release
     }
   });
   //reload monitoring
   watch([
-    'dist/**/*'], function(event){
+    CONFIG.directory.release + '/**/*'], function(event){
       gulp.start('reload');
     });
 
